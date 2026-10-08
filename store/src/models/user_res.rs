@@ -1,9 +1,9 @@
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
-
-#[derive(Debug, FromRow)]
+use serde::Serialize;
+#[derive(Debug, FromRow, Serialize)]
 pub struct CreateUserRes {
-    pub id: i32,
+    pub id: String,
     pub username: String,
     pub created_at: DateTime<Utc>,
 }

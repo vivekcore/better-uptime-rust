@@ -2,9 +2,7 @@
 use sqlx::FromRow;
 use serde::Deserialize;
 
-
 #[derive(Debug, FromRow, Deserialize)]
-pub struct CreateUser {
-    pub username: String,
-    pub password: String,
+pub struct AddWebsite {
+    pub url: String
 }
