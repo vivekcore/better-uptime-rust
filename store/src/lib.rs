@@ -29,7 +29,7 @@ impl Store {
 
         let user = sqlx::query_as::<_,CreateUserRes>(
             r#"
-                INSER INTO users (username, password)
+                INSERT INTO users (username, password)
                 VALUES ($1,$2)
                 RETURNING id, username, created_at
             "#

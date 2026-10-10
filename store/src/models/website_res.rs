@@ -1,12 +1,11 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+
 use sqlx::prelude::FromRow;
+use uuid::Uuid;
 
-
-
-#[derive(Serialize,FromRow,Debug)]
+#[derive(serde::Serialize,FromRow,Debug)]
 pub struct AddWebsiteRes {
-   pub id: String,
+   pub id: Uuid,
    pub url: String,
    created_at: DateTime<Utc>
 }
