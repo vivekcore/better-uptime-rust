@@ -1,6 +1,10 @@
 use sqlx::{PgPool, postgres::PgPoolOptions};
 
-use crate::models::{user_res::CreateUserRes, website_res::AddWebsiteRes};
+use crate::models::{
+    user_res::{CreateUserRes, UserAuth},
+    website_res::AddWebsiteRes,
+};
+use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct Store {
@@ -24,60 +28,67 @@ impl Store {
     pub async fn create_user(
         &self,
         username: &str,
-        password: &str
-    ) -> Result<CreateUserRes,sqlx::Error> {
-
-        let user = sqlx::query_as::<_,CreateUserRes>(
+        password: &str,
+    ) -> Result<CreateUserRes, sqlx::Error> {
+        let user = sqlx::query_as::<_, CreateUserRes>(
             r#"
                 INSERT INTO users (username, password)
                 VALUES ($1,$2)
                 RETURNING id, username, created_at
-            "#
+            "#,
         )
         .bind(username)
         .bind(password)
         .fetch_one(&self.pool)
         .await?;
-        
-        Ok(user)
 
+        Ok(user)
+    }
+
+    pub async fn find_user_by_username(
+        &self,
+        username: &str,
+    ) -> Result<Option<UserAuth>, sqlx::Error> {
+        sqlx::query_as::<_, UserAuth>(
+            "SELECT id, username, password AS password_hash, created_at FROM users WHERE username = $1",
+        )
+        .bind(username)
+        .fetch_optional(&self.pool)
+        .await
     }
 
     pub async fn add_website(
         &self,
-        url: &str
+        url: &str,
+        user_id: Uuid,
     ) -> Result<AddWebsiteRes, sqlx::Error> {
-        
-        let response = sqlx::query_as::<_,AddWebsiteRes>(
+        let response = sqlx::query_as::<_, AddWebsiteRes>(
             r#"
-                INSER INTO websites (url)
-                VALUES ($ 1)
-                RETURNING id, url, created_at
-            "#
+                INSERT INTO websites (url, user_id)
+                VALUES ($1, $2)
+                RETURNING id, url, time_added
+            "#,
         )
         .bind(url)
+        .bind(user_id)
         .fetch_one(&self.pool)
         .await?;
 
-    Ok(response)
+        Ok(response)
     }
-    pub async  fn get_website(
-        &self,
-        user_id: String
-    ) -> Result<Vec<AddWebsiteRes>, sqlx::Error>{
-
-        let response = sqlx::query_as::<_,AddWebsiteRes>(
+    pub async fn get_website(&self, user_id: Uuid) -> Result<Vec<AddWebsiteRes>, sqlx::Error> {
+        let response = sqlx::query_as::<_, AddWebsiteRes>(
             r#"
-                SELECT id, url, created_at
+                SELECT id, url, time_added
                 FROM websites
                 WHERE user_id = $1
                 ORDER BY id DESC
-            "#
+            "#,
         )
         .bind(user_id)
         .fetch_all(&self.pool)
         .await?;
 
-    Ok(response)
+        Ok(response)
     }
 }

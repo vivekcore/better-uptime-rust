@@ -7,5 +7,5 @@ use uuid::Uuid;
 pub struct AddWebsiteRes {
    pub id: Uuid,
    pub url: String,
-   created_at: DateTime<Utc>
+   time_added: DateTime<Utc>
 }
