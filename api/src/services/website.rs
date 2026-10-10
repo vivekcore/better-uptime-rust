@@ -6,7 +6,7 @@ pub async fn create_website(
     State(store): State<Store>,
     Json(payload): Json<AddWebsite>,
 ) -> Result<Json<AddWebsiteRes>, (StatusCode, String)> {
-
+//Add middle ware to get loged user id
     let site = AddWebsite {
         url: payload.url,
     };
